@@ -65,6 +65,14 @@ summary(met$elev)
 summary(met$wind.sp)
 ```
 
+Updating NAs in elevation 
+
+```{r}
+#met[met$elev==9999.0] <- NA
+met[elev == 9999.0, elev := NA]
+summary(met$elev)
+```
+
 ## R Markdown
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
