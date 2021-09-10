@@ -73,22 +73,17 @@ met[elev == 9999.0, elev := NA]
 summary(met$elev)
 ```
 
-## R Markdown
+The highest weather station is at `r max(met$elev, na.rm = TRUE)` ft. Now we need to fix the temperature.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+#met <- met[temp>-15]
+#met2 <- met[order(temp)]
+#head(met2)
 
-```{r cars}
-summary(cars)
+met <- met[temp>-15][order(temp)]
+summary(met[, .(lat, lon, wind.sp, temp, elev)])
 ```
 
-## Including Plots
+6. Calculate summary statistics 
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
