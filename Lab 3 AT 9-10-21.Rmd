@@ -87,3 +87,24 @@ summary(met[, .(lat, lon, wind.sp, temp, elev)])
 
 6. Calculate summary statistics 
 
+```{r}
+met[elev==max(elev, na.rm = TRUE)][, summary(wind.sp)]
+met[elev==max(elev, na.rm = TRUE)][, summary(temp)]
+```
+
+```{r}
+met[elev==max(elev, na.rm = TRUE)] , .(
+  temp_wind= cor(temp, wind.sp, use= "complete")
+  temp_hour= cor(temp, hour, use= "complete")
+  temp_day= cor(temp, day, use= "complete")
+  wind_day= cor(wind.sp, day, use = "complete")
+  wind_hour= cor(wind.sp, hour, use= "complete")
+)]
+```
+
+Step 7: Exploratory Graphs
+
+```{r}
+hist(met$elev, breaks = 100)
+```
+
