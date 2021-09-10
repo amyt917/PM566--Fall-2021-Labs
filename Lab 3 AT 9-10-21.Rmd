@@ -93,7 +93,7 @@ met[elev==max(elev, na.rm = TRUE)][, summary(temp)]
 ```
 
 ```{r}
-met[elev==max(elev, na.rm = TRUE)] , .(
+met[elev==max(elev, na.rm = TRUE)], .(
   temp_wind= cor(temp, wind.sp, use= "complete")
   temp_hour= cor(temp, hour, use= "complete")
   temp_day= cor(temp, day, use= "complete")
