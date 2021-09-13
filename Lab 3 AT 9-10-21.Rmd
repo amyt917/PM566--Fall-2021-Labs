@@ -124,6 +124,8 @@ leaflet(elev) %>%
   addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
 ```
 
+Location: Denver, Colorado 
+
 ```{r}
 library(lubridate)
 elev$date <- with(elev, ymd_h(paste(year, month, day, hour, sep= ' ')))
@@ -140,4 +142,4 @@ plot(elev$date, elev$temp, type='l')
 ```{r}
 plot(elev$date, elev$wind.sp, type='l')
 ```
-
+Trends: No obvious trends in time series plot of temperature, but decreases in wind speeds observed from between August 20-24.
