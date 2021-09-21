@@ -95,7 +95,7 @@ met_avg[!is.na(dew.point) & !is.na(wind.sp)] %>%
   geom_jitter() + 
   geom_smooth(method=lm, se= FALSE, col="black")
 ```
-Slightly greater positive correlation observed between wind speed and dew point temperatures in the Southeast and Northeast regions than with the Nothwest and Southwest regions.
+Slightly greater positive correlation are observed between wind speed and dew point temperatures in the Southeast and Northeast regions than with the Nothwest and Southwest regions.
 
 5. 5. Use geom_bar to create barplots of the weather stations by elevation category coloured by region
 ```{r}
