@@ -86,13 +86,16 @@ ggplot(met_avg, mapping = aes(y= wind.sp, x=1)) +
   geom_violin() + 
   facet_grid(~region)
 ```
+Northeast and Southeast regions have slightly lower average wind speeds than the Northwest and Southwest regions.
+
 4. Use geom_jitter with stat_smooth to examine the association between dew point temperature and wind speed by region
 ```{r}
 met_avg[!is.na(dew.point) & !is.na(wind.sp)] %>%
-  ggplot(mapping=aes(x = wind.sp, y = dew.point, color=region, linetype= region)) +
+  ggplot(mapping=aes(x = dew.point, y = wind.sp, color=region, linetype= region)) +
   geom_jitter() + 
   geom_smooth(method=lm, se= FALSE, col="black")
 ```
+Slightly greater positive correlation observed between wind speed and dew point temperatures in the Southeast and Northeast regions than with the Nothwest and Southwest regions.
 
 5. 5. Use geom_bar to create barplots of the weather stations by elevation category coloured by region
 ```{r}
@@ -104,7 +107,7 @@ met_avg[!is.na(elev_cat)] %>%
   xlab("Elevation") + 
   ylab("Number of weather stations")
 ```
-
+There are between 100-300 weather stations in high elevations in all regions, but there is no weather stations in the Northwest region at low elevations and 500 weather stations in the Southeast region. 
 
 6. Use stat_summary to examine mean dew point and wind speed by region with standard deviation error bars
 ```{r}
@@ -114,7 +117,9 @@ ggplot(
     stat_summary(fun.data = "mean_sdl") +
     stat_summary(fun.data = "mean_sdl", geom = "errorbar")
 ```
-7. Make a map showing the spatial trend in relative h in the US
+Despite the average wind speed in the Northeast and Southeast regions being lowered than the Northwest and Southwest regions, the error bars overlap so there is likely no significant differences between the regions. 
+
+7. Make a map showing the spatial trend in relative humidity in the US
 
 ```{r}
 library(leaflet)
@@ -132,15 +137,15 @@ leaflet(met_avg) %>%
   addLegend('bottomleft', pal=temp.pal, values=met_avg$rh,
           title='Temperature, C', opacity=1)
 ```
+Greater relative humidity is observed on the east coast than the west coast.
 
 8. Use a ggplot extension
 ```{r}
 library(ggstatsplot)
-gghistostats(
-  data = met_avg[!is.na(wind.sp) & !is.na(dew.point)],
-  x = wind.sp,
-  y = dew.point, 
-  title = "Weather Stations by Elevation"
-)
+ggpiestats(met_avg, 
+  x=region, 
+  y= elev_cat,
+  title = "Percentage of Weather Stations in Each Region, by Elevation",
+  )
 ```
-
+This pie chart is consistent to what was observed in the bar graph, where there is a similar amount of weather stations in each region in the high elevation group, and a high amount (61%) of low elevation weather stations in the Southeast region and only 1% in the Northwest group.
