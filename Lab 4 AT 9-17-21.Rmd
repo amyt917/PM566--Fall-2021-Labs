@@ -88,7 +88,21 @@ ggplot(met_avg, mapping = aes(y= wind.sp, x=1)) +
 ```
 4. Use geom_jitter with stat_smooth to examine the association between dew point temperature and wind speed by region
 ```{r}
+met_avg[!is.na(dew.point) & !is.na(wind.sp)] %>%
+  ggplot(mapping=aes(x = wind.sp, y = dew.point, color=region, linetype= region)) +
+  geom_jitter() + 
+  geom_smooth(method=lm, se= FALSE, col="black")
+```
 
+5. 5. Use geom_bar to create barplots of the weather stations by elevation category coloured by region
+```{r}
+met_avg[!is.na(elev_cat)] %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = elev_cat, fill = region), position = "dodge") + 
+  scale_fill_brewer(palette = "Accent") + 
+  labs(title = "Weather Stations by Elevation") + 
+  xlab("Elevation") + 
+  ylab("Number of weather stations")
 ```
 
 
@@ -117,5 +131,16 @@ leaflet(met_avg) %>%
   # And a pretty legend
   addLegend('bottomleft', pal=temp.pal, values=met_avg$rh,
           title='Temperature, C', opacity=1)
+```
+
+8. Use a ggplot extension
+```{r}
+library(ggstatsplot)
+gghistostats(
+  data = met_avg[!is.na(wind.sp) & !is.na(dew.point)],
+  x = wind.sp,
+  y = dew.point, 
+  title = "Weather Stations by Elevation"
+)
 ```
 
