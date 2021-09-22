@@ -1,8 +1,9 @@
 ---
 title: "Lab 4 AT 9-17-21"
-output: html_document
-- always_allow_html: true 
-+ always_allow_html: true
+output:
+  - github_document
+  - html_document
+always_allow_html: true
 ---
 
 ```{r}
@@ -140,7 +141,7 @@ leaflet(met_avg) %>%
 Greater relative humidity is observed on the east coast than the west coast.
 
 8. Use a ggplot extension
-```{r}
+```{r eval = FALSE}
 library(ggstatsplot)
 ggpiestats(met_avg, 
   x=region, 
@@ -148,4 +149,5 @@ ggpiestats(met_avg,
   title = "Percentage of Weather Stations in Each Region, by Elevation",
   )
 ```
+
 This pie chart is consistent to what was observed in the bar graph, where there is a similar amount of weather stations in each region in the high elevation group, and a high amount (61%) of low elevation weather stations in the Southeast region and only 1% in the Northwest group.

@@ -1,6 +1,9 @@
 ---
 title: "PM 566- Lab 3"
-output: html_document
+output:
+  - html_document
+  - github_document
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
@@ -10,10 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 Step 1- Read the Data 
 
 ```{r}
+# LOAD THE R PACKAGES!
+library(tidyverse)
+library(leaflet)
 
 #install if only not installed
 if (!require(data.table)) {
   install.packages("data.table")
+  library(data.table)
 }
 
 #only download if we don't have the file
