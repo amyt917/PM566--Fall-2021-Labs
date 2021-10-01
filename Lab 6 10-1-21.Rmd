@@ -10,6 +10,50 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(data.table)
 library(ggplot2)
+library(tidyverse)
 library(tidytext)
 ```
 
+Download the data
+```{r}
+fn <- "mtsamples.csv"
+if(!file.exists(fn))
+  download.file("https://raw.githubusercontent.com/USCbiostats/data-science-data/master/00_mtsamples/mtsamples.csv", destfile = fn)
+
+mtsamples <- read.csv(fn) #reads data into a data frame from base R 
+mtsamples <- as_tibble(mtsamples)
+```
+
+1- What specialties do we have? 
+```{r}
+library(dplyr)
+specialities <- mtsamples %>% count(medical_specialty) 
+
+#Number of different medical specialties
+specialities
+nrow(specialities)
+
+#histogram
+specialities %>%
+ggplot(aes(n, fct_reorder(medical_specialty, n))) + 
+  geom_col() 
+
+#Table of top 15 specialties 
+specialities %>% 
+  arrange(desc(n)) %>%
+  top_n(n, 15) %>%
+  knitr::kable()
+  
+```
+There are `r nrow(specialities)` of different medical specialties. They are not evenly distributed, as the majority are surgeons and then less than half are consultants.
+
+2- Tokenize words in the transcription column
+```{r}
+mtsamples %>%
+  unnest_tokens(output = word, input = transcription) %>%
+  count(word, sort = TRUE) %>%
+  top_n(20) %>%
+  ggplot(aes (x = n, y = fct_reorder(word,n))) + geom_col()
+
+```
+The word patient seems to be important, but we observe a lot of stop words
