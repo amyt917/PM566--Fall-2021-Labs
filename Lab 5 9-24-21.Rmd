@@ -62,15 +62,131 @@ Question 1: Representative station for the US
 station_averages <- met[,. (
   temp = mean(temp, na.rm = TRUE), 
   wind.sp = mean(wind.sp, na.rm= TRUE),
-  atm.press = mean(atm.press, na.rm= TRUE)
+  atm.press = mean(atm.press, na.rm= TRUE),
+  lat = mean(lat, na.rm= TRUE),
+  lon = mean(lon, na.rm= TRUE)
 ), by= USAFID]
 ```
 
 ```{r}
-station_averages[,.(
+medians <- station_averages[,.(
   temp_50= quantile(temp, probs = .5, na.rm = TRUE),
   wind.sp_50= quantile(wind.sp, probs = .5, na.rm = TRUE),
   atm.press_50= quantile(atm.press, probs = .5, na.rm = TRUE)
 )]
+
+medians
+```
+Now we can find stations that are closest to these 
+```{r}
+station_averages[, temp_dist := abs(temp - medians$temp_50)]
+median_temp_station <- station_averages[order(temp_dist)][1]
+median_temp_station
+```
+The median temperature station is `r median_temp_station $ USAFID`
+
+Question 2: Representative station per state
+
+We need to first recover the state variable by merging
+```{r}
+station_averages <- merge(x = station_averages, y = stations, by.x = "USAFID", by.y = "USAF", 
+    all.x = TRUE, all.y = FALSE)
+```
+
+Now we can compute the median per state 
+```{r}
+
+station_averages[, temp_50 := quantile(temp, probs = .5, na.rm = TRUE), by = STATE]
+station_averages[, wind.sp_50 := quantile(wind.sp, probs = .5, na.rm = TRUE), by = STATE]
+```
+Now the euclidean distance... 
+```{r}
+station_averages[, eudist := sqrt(
+  (temp - temp_50)^2 + (wind.sp - wind.sp_50)^2
+  )]
+station_averages
+```
+Select unique median station per state at the lowest latitude...
+
+```{r} 
+
+#Identify station with the lowest latitude in each state
+median_station_state <- station_averages[, list(USAFID, lat, lon, STATE)]
+lat_station <-  median_station_state[ , list(USAFID, lat_min = min(lat), lat, lon), by = STATE]
+lat_station[lat_min == lat]
+
+lat_station
+
+```
+
+
+Question 3: In the middle? Visualize station closest to the midpoint of the state + representative station using leaflet 
+
+Compute midpoint per state 
+```{r}
+
+station_averages[, lat_mdpt := (max(lat) + min(lat)) / 2, by = STATE]
+station_averages[, lon_mdpt := (max(lon) + min(lon)) / 2, by = STATE]
+
+station_averages[, lat_distance := abs(lat - lat_mdpt)]
+station_averages[, lon_distance := abs(lon - lon_mdpt)]
+
+station_mdpt <-  station_averages[, list(USAFID, lat, lon, lat_distance, lon_distance, hyp = sqrt(lat_distance^2 + lon_distance^2)), by = STATE]
+station_hyp <- station_mdpt[, list(USAFID, lat, lon, hyp_min = min(hyp), hyp), by = STATE]
+station_hyp[hyp_min == hyp]
+
+station_hyp
+```
+
+Leaflet Plot
+```{r}
+
+
+library(leaflet)
+#leaflet(lat_station) %>%
+#  addProviderTiles('CartoDB.Positron') %>%
+#  addCircles(lat = ~lat, lng = ~lon, opacity = 1, fillOpacity = 1, radius = 400)
+
+leaflet() %>%
+  addProviderTiles('CartoDB.Positron') %>%
+  addCircles(
+  data = lat_station[lat_min == lat],
+  lat=~lat, lng=~lon,
+  opacity = 1, fillOpacity = 1, radius = 10, color = "blue") %>%
+  addCircles(
+  data = station_hyp[hyp_min == hyp],
+  lat=~lat, lng=~lon,
+  opacity = 1, fillOpacity = 1, radius = 10, color = "red")
+```
+
+
+Question 4: Means of means
+
+```{r}
+met[, state_temp := mean(temp, na.rm = TRUE), by = STATE]
+met[, temp_cat := fifelse(
+  state_temp < 20, "low-temp",
+  fifelse(state_temp < 25, "mid-temp", "high-temp"))
+  ]
+```
+
+Let's make sure we don't have NAs
+
+```{r}
+table(met$temp_cat, useNA = "always")
+```
+
+Include all other variables....
+```{r}
+tab <- met[, .(
+  N_entries = .N,
+  N_stations = length(unique(USAFID)),
+  N_states = length(unique(STATE)),
+  mean_temp = mean(temp, na.rm = TRUE),
+  mean_wind.sp = mean(wind.sp, na.rm= TRUE),
+  mean_atm.pres = mean(atm.press, na.rm= TRUE)
+) ,by = temp_cat]
+
+knitr::kable(tab)
 ```
 
