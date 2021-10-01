@@ -91,3 +91,23 @@ mtsamples %>%
 There are several more interesting phrases "the operating room", "prepped and draped", tolerated the procedure".
 
 5- Count words before and after a word you've chosen
+```{r}
+after <- mtsamples %>%
+  unnest_ngrams(bigram, transcription, n=2) %>%
+  separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+  filter(word1 == "patient") %>%
+  select(word1, word2) %>%
+  count(word2, sort = TRUE)
+after
+
+before <- mtsamples %>%
+  unnest_ngrams(bigram, transcription, n=2) %>%
+  separate(bigram, into = c("word1", "word2"), sep = " ") %>%
+  filter(word2 == "patient") %>%
+  select(word1, word2) %>%
+  count(word1, sort = TRUE)
+before
+
+```
+There are 269 words that come before the word "patient" and 588 words that come after.
+
