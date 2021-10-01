@@ -92,22 +92,48 @@ There are several more interesting phrases "the operating room", "prepped and dr
 
 5- Count words before and after a word you've chosen
 ```{r}
-after <- mtsamples %>%
+bigrams <- mtsamples %>%
   unnest_ngrams(bigram, transcription, n=2) %>%
   separate(bigram, into = c("word1", "word2"), sep = " ") %>%
-  filter(word1 == "patient") %>%
-  select(word1, word2) %>%
-  count(word2, sort = TRUE)
-after
+  filter((word1 == "patient") | (word2 == "patient"))
 
-before <- mtsamples %>%
-  unnest_ngrams(bigram, transcription, n=2) %>%
-  separate(bigram, into = c("word1", "word2"), sep = " ") %>%
-  filter(word2 == "patient") %>%
-  select(word1, word2) %>%
-  count(word1, sort = TRUE)
-before
+bigrams %>%
+  filter (word1 == "patient") %>%
+  select (word1, word2) %>%
+  count (word2, sort = TRUE)
+
+bigrams %>%
+  filter (word2 == "patient") %>%
+  select (word1, word2) %>%
+  count (word1, sort = TRUE)
 
 ```
-There are 269 words that come before the word "patient" and 588 words that come after.
+Since we are looking at single words agaiin it is a good idea to treat these as single tokens. So let's remove the stopwords and numbers.
+```{r}
+bigrams %>%
+  filter(word1 == "patient") %>%
+  filter(!(word2 %in% stop_words$word) & !grepl(pattern = "^[0-9]+$", word2)) %>%
+  count(word2, sort=TRUE) %>%
+  top_n(10) %>%
+  knitr::kable()
+
+bigrams %>%
+  filter(word2 == "patient") %>%
+  filter(!(word1 %in% stop_words$word) & !grepl(pattern = "^[0-9]+$", word1)) %>%
+  count(word1, sort=TRUE) %>%
+  top_n(10) %>%
+  knitr::kable()
+```
+
+There are  words that come before the word "patient" and 588 words that come after.
+
+6- Which words are most used in each specialty? Remove stopwords. What are the 5 most used words?
+```{r}
+mtsamples %>%
+    unnest_tokens(word, input = transcription) %>%
+    group_by(medical_specialty) %>%
+    count(word, sort = TRUE) %>%
+    filter(!(word %in% stop_words$word) & !grepl(pattern = "^[0-9]+$", word1)
+
+```
 
