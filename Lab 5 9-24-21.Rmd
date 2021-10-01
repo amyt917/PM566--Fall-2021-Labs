@@ -187,6 +187,6 @@ tab <- met[, .(
   mean_atm.pres = mean(atm.press, na.rm= TRUE)
 ) ,by = temp_cat]
 
-knitr::kable(tab)
+knitr::kable(tab) 
 ```
 
