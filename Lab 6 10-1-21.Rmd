@@ -56,4 +56,38 @@ mtsamples %>%
   ggplot(aes (x = n, y = fct_reorder(word,n))) + geom_col()
 
 ```
-The word patient seems to be important, but we observe a lot of stop words
+The word patient seems to be important, but we observe a lot of stop words.
+
+3- Remove stopwords from visualization
+```{r}
+mtsamples %>%
+  unnest_tokens(output = word, input = transcription) %>%
+  anti_join(stop_words, by = c("word")) %>%
+
+  #exclude anything that is a number b/w 0-9 
+  filter(!grepl(pattern = "^[0-9]+$", x= word)) %>% 
+  count(word, sort = TRUE) %>%
+  top_n(20) %>%
+  ggplot(aes (x = n, y = fct_reorder(word,n))) + geom_col()
+```
+4- Tokenize into bigrams and trigrams
+```{r}
+mtsamples %>%
+  unnest_ngrams(bigram, transcription, n=2) %>%
+  count(bigram, sort = TRUE) %>%
+  top_n(20) %>%
+  ggplot(aes (x = n, y = fct_reorder(bigram,n))) + geom_col()
+#do not remove stop words when you dealing with bigrams
+
+```
+Using bigrams is not very infomative, let's try trigrams
+```{r}
+mtsamples %>%
+  unnest_ngrams(trigram, transcription, n=3) %>%
+  count(trigram, sort = TRUE) %>%
+  top_n(20) %>%
+  ggplot(aes (x = n, y = fct_reorder(trigram,n))) + geom_col()
+```
+There are several more interesting phrases "the operating room", "prepped and draped", tolerated the procedure".
+
+5- Count words before and after a word you've chosen
