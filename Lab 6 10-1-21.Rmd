@@ -116,18 +116,18 @@ bigrams %>%
   filter(word1 == "patient") %>%
   filter(!(word2 %in% stop_words$word) & !grepl(pattern = "^[0-9]+$", word2)) %>%
   count(word2, sort=TRUE) %>%
-  top_n(10) %>%
-  knitr::kable()
+  top_n(10) 
+  #knitr::kable()
 
 bigrams %>%
   filter(word2 == "patient") %>%
   filter(!(word1 %in% stop_words$word) & !grepl(pattern = "^[0-9]+$", word1)) %>%
   count(word1, sort=TRUE) %>%
-  top_n(10) %>%
-  knitr::kable()
+  top_n(10) 
+  #knitr::kable()
 ```
 
-There are  words that come before the word "patient" and 588 words that come after.
+There are 11 words that come before the word "patient" and 10 words that come after.
 
 6- Which words are most used in each specialty? Remove stopwords. What are the 5 most used words?
 ```{r}
@@ -139,8 +139,6 @@ mtsamples %>%
   top_n(5) %>%
   arrange(medical_specialty, n) %>%
   knitr::kable()
-    
-    #Selecting by n
 
 ```
 The 5 most used words per specialty are shown in the above chart.
