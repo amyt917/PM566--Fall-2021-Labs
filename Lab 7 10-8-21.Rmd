@@ -1,0 +1,136 @@
+---
+title: "Lab 7"
+output:
+  html_document: default
+  github_document: 
+    html_preview: false
+  word_document: default
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+options(repos = c(CRAN = "http://cran.rstudio.com"))
+```
+
+```{r}
+if (knitr::is_html_output(excludes = "gfm")) {
+  
+}
+```
+
+Question 1: How many sars-cov-2 papers
+```{r}
+library(httr)
+library(xml2)
+library(stringr)
+library(data.table)
+library(tidytext)
+
+# Downloading the website
+website <- xml2::read_html("https://pubmed.ncbi.nlm.nih.gov/?term=sars-cov-2")
+
+# Finding the counts
+counts <- xml2::xml_find_first(website, "/html/body/main/div[9]/div[2]/div[2]/div[1]/span")
+
+# Turning it into text
+counts <- as.character(counts)
+counts
+
+# Extracting the data using regex
+stringr::str_extract(counts, "[0-9,]+")
+stringr::str_extract(counts, "[[:digit:],]+")
+```
+
+Question 2- 
+```{r}
+library(httr)
+query_ids <- GET(
+  url   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
+  query = list(
+      db = "pubmed",
+      term = "covid19 hawaii",
+      retmax = 1000
+      ))
+query_ids
+
+# Extracting the content of the response of GET
+ids <- httr::content(query_ids)
+ids
+
+ids_list <-xml2::as_list(ids)
+ids_list
+```
+
+Question 3- 
+```{r}
+# Turn the result into a character vector
+ids <- as.character(ids)
+cat(ids)
+  
+# Find all the ids (<Id>34195618</Id>)
+ids <- stringr::str_extract_all(ids, "<Id>[0-9]+</Id>")[[1]]
+
+# Remove all the leading and trailing <Id> </Id>. Make use of "|"
+ids <- stringr::str_remove_all(ids, "<Id>|</Id>")
+head(ids)
+
+
+publications <- GET(
+  url   = "https://eutils.ncbi.nlm.nih.gov/",
+  path  = "entrez/eutils/efetch.fcgi",
+  query = list(
+    db =  "pubmed",
+    id = I(paste(ids, collapse = ",")),
+    retmax = 1000,
+    rettype = "abstract"
+    ))
+
+#id: A character with all the ids separated by comma, e.g., “1232131,546464,13131”
+
+# Turning the output into character vector
+publications <- httr::content(publications)
+publications_txt <- as.character(publications)
+
+```
+
+Question 4- check this one
+```{r}
+institution <- str_extract_all(
+  str_to_lower(publications_txt),
+  "university\\s+of\\s+(southern|new|northern|the)?\\s*[[:alpha:]-]+|[[:alpha:]-]+\\s+institute\\s+of\\s+[[:alpha:]-]+"
+  ) 
+institution <- unlist(institution)
+table(institution)
+
+schools_and_deps <- str_extract_all(
+  str_to_lower(publications_txt),
+  "school\\s+of\\s+[[:alpha:]-]+|department\\s+of\\s+[[:alpha:]-]+"
+  )
+table(schools_and_deps)
+```
+
+
+Question 5- 
+```{r}
+pub_char_list <- xml2::xml_children(publications)
+pub_char_list <- sapply(pub_char_list, as.character)
+
+abstracts <- str_extract(pub_char_list, "<Abstract>[[:print:][:space:]]+</Abstract>")
+abstracts <- str_remove_all(abstracts, "</?[[:alnum:]- =\"]+>")
+abstracts <- str_replace_all(abstracts, "[[:space:]]+"," ") 
+
+titles <- str_extract(pub_char_list, "<Abstract>[[:print:][:space:]]+</Abstract>")
+titles <- str_remove_all(titles, "</?[[:alnum:]- =\"]+>")
+```
+
+Finally, data set
+```{r}
+database <- data.frame(
+  PubMedId = ids, 
+  Title    = titles, 
+  Abstract = abstracts
+)
+knitr::kable(database[1:20,],caption = "Some papers about Covid and Hawaii")
+```
+
