@@ -116,5 +116,6 @@ Is it faster?
 ```{r}
 system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 1L))
 system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 2L))
+
 ```
 
